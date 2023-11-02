@@ -14,7 +14,7 @@ try:
         print(art)
 
 except:
-    tprint("--- WAYNE ---")
+    tprint("- WAYNE  -")
 
 
 sym = """
@@ -179,7 +179,6 @@ try:
 
 
         elif packet_type == "bc":
-            girdi = girdi.split()
 
             if "-i" in girdi:
                 iIndex = girdi.index("-i")
@@ -200,6 +199,7 @@ try:
 
             else:
                 print("Lütfen geçerli bir ip(-i) adresi girin")
+
 
 
     elif (girdi) == "help":
