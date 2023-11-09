@@ -120,111 +120,115 @@ class Broadcast:
 
 
 
+while True:
+    try:
 
-try:
-
-    girdi = input(">> ")
-
-
-    if "-p" in girdi:
-        girdi = girdi.split()
-
-        p_index = girdi.index("-p")
-        packet_type = girdi[p_index+1]
-
-        ping = Ping()
-
-        if packet_type == "ping":
-
-            ip_girdi = input("Taranacak IP veya IP aralığını girin: ")
-
-            interface = input("Ağ Arayüzü: ")
+        girdi = input(">> ")
 
 
-            if "/" in ip_girdi:
-                ip = ip_girdi.split("/")
-                ip_beggin = ip[0].split(".")
-                ip_end = ip[1].split(".")
+        if "-p" in girdi:
+            girdi = girdi.split()
 
-                ip_core = ""
+            p_index = girdi.index("-p")
+            packet_type = girdi[p_index+1]
 
-                #print(ip_beggin[3])
-                #print(ip_end[3])
+            ping = Ping()
 
-                ip_core = ".".join(ip_beggin[:3])   # Parçalanan IP'nin bır kısmı birleştirilir.
+            if packet_type == "ping":
 
-                print(ip_core)
+                ip_girdi = input("Taranacak IP veya IP aralığını girin: ")
 
-                if "-t" in girdi:
-                    t_index = girdi.index("-t")
-                    timeOut = float(girdi[t_index+1]) 
-                    print("time: ",timeOut)
-
-                    ping.sendPCKTinRange(ip_core,int(ip_beggin[3]), int(ip_end[3]), interface, timeOut)
-                
-                else:
-                    ping.sendPCKTinRange(ip_core,int(ip_beggin[3]), int(ip_end[3]), interface)
+                interface = input("Ağ Arayüzü: ")
 
 
-            elif not "/" in ip_girdi:
-                if "-t" in girdi:
-                    t_index = girdi.index("-t")
-                    timeOut = float(girdi[t_index+1]) 
-                    print("time: ",timeOut)
-                
-                    ping.sendPCKT(ip_girdi, interface, timeOut)
+                if "/" in ip_girdi:
+                    ip = ip_girdi.split("/")
+                    ip_beggin = ip[0].split(".")
+                    ip_end = ip[1].split(".")
 
-                else:
-                    ping.sendPCKT(ip_girdi, interface)
+                    ip_core = ""
 
-            else:
-                print(sym,"Lütfen uygun ip adresi veya adreslerini girin.")
+                    #print(ip_beggin[3])
+                    #print(ip_end[3])
 
+                    ip_core = ".".join(ip_beggin[:3])   # Parçalanan IP'nin bır kısmı birleştirilir.
 
+                    print(ip_core)
 
-        elif packet_type == "bc":
+                    if "-t" in girdi:
+                        t_index = girdi.index("-t")
+                        timeOut = float(girdi[t_index+1]) 
+                        print("time: ",timeOut)
 
-            if "-i" in girdi:
-                iIndex = girdi.index("-i")
-                ipIndex = girdi[iIndex+1] 
-
-
-                if "-m" in girdi:
-                    mindex = girdi.index("-m")
-                    macindex = girdi[mindex+1]
-
-                    br = Broadcast(ipIndex, macindex)
-
-                else:
-                    br = Broadcast(ipIndex)
-
+                        ping.sendPCKTinRange(ip_core,int(ip_beggin[3]), int(ip_end[3]), interface, timeOut)
                     
+                    else:
+                        ping.sendPCKTinRange(ip_core,int(ip_beggin[3]), int(ip_end[3]), interface)
 
 
-            else:
-                print("Lütfen geçerli bir ip(-i) adresi girin")
+                elif not "/" in ip_girdi:
+                    if "-t" in girdi:
+                        t_index = girdi.index("-t")
+                        timeOut = float(girdi[t_index+1]) 
+                        print("time: ",timeOut)
+                    
+                        ping.sendPCKT(ip_girdi, interface, timeOut)
+
+                    else:
+                        ping.sendPCKT(ip_girdi, interface)
+
+                else:
+                    print(sym,"Lütfen uygun ip adresi veya adreslerini girin.")
 
 
 
-    elif (girdi) == "help":
-        print(sym,"""
-            
-    -p ping   =   Icmp paketleri gönderir.
-    -p bc     =   Arp paketi gönderir.
-    -t        =   Zaman aralığını belirler.
-    -m        =   Mac adresini belirler
+            elif packet_type == "bc":
 
-    Icmp örnek IP girdisi     =   185.147.1.99/185.147.1.111
-    Arp örnek IP girdisi      =   185.147.1.99/24
-            """)
-
-    else:
-        print(sym,"Lütfen geçerli bir paket veya komut seçin")
+                if "-i" in girdi:
+                    iIndex = girdi.index("-i")
+                    ipIndex = girdi[iIndex+1] 
 
 
-except Exception as e:
-    print(sym,"Hatalı girdi...")
-    print(e)
+                    if "-m" in girdi:
+                        mindex = girdi.index("-m")
+                        macindex = girdi[mindex+1]
 
+                        br = Broadcast(ipIndex, macindex)
+
+                    else:
+                        br = Broadcast(ipIndex)
+
+                        
+
+
+                else:
+                    print("Lütfen geçerli bir ip(-i) adresi girin")
+
+
+
+        elif (girdi) == "help":
+            print(sym,"""
+                
+        -p ping   =   Icmp paketleri gönderir.
+        -p bc     =   Arp paketi gönderir.
+        -t        =   Zaman aralığını belirler.
+        -m        =   Mac adresini belirler
+
+        Icmp örnek IP girdisi     =   185.147.1.99/185.147.1.111
+        Arp örnek IP girdisi      =   185.147.1.99/24
+                """)
+
+
+        elif "exit" in girdi:
+            break
+
+
+        else:
+            print(sym,"Lütfen geçerli bir paket veya komut seçin")
+
+
+    except Exception as e:
+        print(sym,"Hatalı girdi...")
+        print(e)
 
 
