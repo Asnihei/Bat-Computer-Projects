@@ -2,19 +2,6 @@
     # Projede scapy kütüphanesi kullanılacak
 from scapy.all import *
 import os
-from art import *
-
-
-    # ASCII dosyasını açar
-try:
-    current = os.getcwd() 
-    path = os.path.join(current,"logo2.txt")  
-    with open(path,"r") as file:
-        art = file.read()
-        print(art)
-
-except:
-    tprint("- WAYNE  -")
 
 
 sym = """
@@ -22,6 +9,23 @@ sym = """
 |       |
  \/-V-\/
 """
+
+try:
+    current = os.getcwd() 
+    path = os.path.join(current,"logo2.txt")  
+    with open(path,"r") as file:
+        art = file.read()
+        print(art)
+
+
+except FileNotFoundError as f:
+    from art import *
+    tprint("- WAYNE  -")
+
+except (ModuleNotFoundError, NameError) as e:
+    print(sym)
+
+
 
     # Ping atma sınıfı 
 class Ping():
