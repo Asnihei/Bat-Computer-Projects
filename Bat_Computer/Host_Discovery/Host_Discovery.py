@@ -2,6 +2,7 @@
     # Projede scapy kütüphanesi kullanılacak
 from scapy.all import *
 import os
+import re
 
 
 sym = """
@@ -11,8 +12,8 @@ sym = """
 """
 
 try:
-    current = os.getcwd() 
-    path = os.path.join(current,"logo2.txt")  
+    current = os.getcwd()
+    path = os.path.join(current,"logo2.txt")
     with open(path,"r") as file:
         art = file.read()
         print(art)
@@ -27,7 +28,7 @@ except (ModuleNotFoundError, NameError) as e:
 
 
 
-    # Ping atma sınıfı 
+    # Ping atma sınıfı
 class Ping():
 
         # IP ve ICMP paketleri oluşturur
@@ -37,6 +38,8 @@ class Ping():
 
         self.icmpPCKT = self.ip/self.icmp
 
+        self.response = None
+
 
         # Belirli bir IP adresi tarar
     def sendPCKT(self, ip, iface, t=0.5):
@@ -45,7 +48,7 @@ class Ping():
 
         self.ipList = []
 
-        
+
         self.icmpPCKT[IP].dst = self.scala  # hedef ip
 
 
@@ -64,6 +67,8 @@ class Ping():
 
 
 
+
+
         # Belirli bir aralıkta ki IP adreslerini tarar
     def sendPCKTinRange(self, beggin, first, last, iface, t=0.5):
 
@@ -79,7 +84,7 @@ class Ping():
             self.icmpPCKT[IP].dst = current_ip      # Hedef IP
 
 
-            try:    
+            try:
                 self.response = sr1(self.icmpPCKT, timeout=t, verbose = False, iface=iface)
                 print(self.icmpPCKT[IP].dst)
 
@@ -94,14 +99,14 @@ class Ping():
 
         print(sym,"Cevap Geldi",self.ipList)
 
-    
+
 
 
 
 class Broadcast:
 
     def __init__(self, ipdst, mac = "ff:ff:ff:ff:ff:ff", time=5):
-        
+
         self.eth = Ether()
         self.arp = ARP()
 
@@ -110,7 +115,7 @@ class Broadcast:
         self.arp.pdst = ipdst
 
         self.bcPckt = self.eth/self.arp
-        
+
         ans, unans = srp(self.bcPckt, timeout=time)
 
         print(sym)
@@ -127,58 +132,65 @@ while True:
 
 
         if "-p" in girdi:
-            girdi = girdi.split()
+            girdis = girdi.split()
 
-            p_index = girdi.index("-p")
-            packet_type = girdi[p_index+1]
+            p_index = girdis.index("-p")
+            packet_type = girdis[p_index+1]
 
             ping = Ping()
 
             if packet_type == "ping":
 
-                ip_girdi = input("Taranacak IP veya IP aralığını girin: ")
 
-                interface = input("Ağ Arayüzü: ")
+                if "-i" in girdi:
+                    girdis = girdi.split()
+                    Iindex = girdis.index("-i")
+                    ip_girdi = girdis[Iindex+1]
+
+                    if "/" in ip_girdi:
+                        ip = ip_girdi.split("/")
+                        ip_beggin = ip[0].split(".")
+                        ip_end = ip[1].split(".")
+
+                        ip_core = ""
+
+                        #print(ip_beggin[3])
+                        #print(ip_end[3])
+
+                        ip_core = ".".join(ip_beggin[:3])   # Parçalanan IP'nin bır kısmı birleştirilir.
 
 
-                if "/" in ip_girdi:
-                    ip = ip_girdi.split("/")
-                    ip_beggin = ip[0].split(".")
-                    ip_end = ip[1].split(".")
+                        if "-iface" in girdi:
+                            match = re.search('-iface "(.+?)"',girdi)
+                            interface = match.group(1)
 
-                    ip_core = ""
 
-                    #print(ip_beggin[3])
-                    #print(ip_end[3])
+                            if "-t" in girdi:
+                                girdi_time = girdi.split()
+                                t_index = girdi_time.index("-t")
+                                timeOut = float(girdi_time[t_index+1])
 
-                    ip_core = ".".join(ip_beggin[:3])   # Parçalanan IP'nin bır kısmı birleştirilir.
+                                ping.sendPCKTinRange(ip_core,int(ip_beggin[3]), int(ip_end[3]), interface, timeOut)
 
-                    print(ip_core)
+                            else:
+                                ping.sendPCKTinRange(ip_core,int(ip_beggin[3]), int(ip_end[3]), interface)
 
-                    if "-t" in girdi:
-                        t_index = girdi.index("-t")
-                        timeOut = float(girdi[t_index+1]) 
-                        print("time: ",timeOut)
+                        else:
+                            print("Lütfen geçerli bir ağ arayüzü belirleyin.")
 
-                        ping.sendPCKTinRange(ip_core,int(ip_beggin[3]), int(ip_end[3]), interface, timeOut)
-                    
+
+                    elif not "/" in ip_girdi:
+                        if "-t" in girdi:
+                            t_index = girdis.index("-t")
+                            timeOut = float(girdis[t_index+1])
+
+                            ping.sendPCKT(ip_girdi, interface, timeOut)
+
+                        else:
+                            ping.sendPCKT(ip_girdi, interface)
+
                     else:
-                        ping.sendPCKTinRange(ip_core,int(ip_beggin[3]), int(ip_end[3]), interface)
-
-
-                elif not "/" in ip_girdi:
-                    if "-t" in girdi:
-                        t_index = girdi.index("-t")
-                        timeOut = float(girdi[t_index+1]) 
-                        print("time: ",timeOut)
-                    
-                        ping.sendPCKT(ip_girdi, interface, timeOut)
-
-                    else:
-                        ping.sendPCKT(ip_girdi, interface)
-
-                else:
-                    print(sym,"Lütfen uygun ip adresi veya adreslerini girin.")
+                        print(sym,"Lütfen uygun ip adresi veya adreslerini girin.")
 
 
 
@@ -186,7 +198,7 @@ while True:
 
                 if "-i" in girdi:
                     iIndex = girdi.index("-i")
-                    ipIndex = girdi[iIndex+1] 
+                    ipIndex = girdi[iIndex+1]
 
 
                     if "-m" in girdi:
@@ -198,7 +210,7 @@ while True:
                     else:
                         br = Broadcast(ipIndex)
 
-                        
+
 
 
                 else:
@@ -208,11 +220,12 @@ while True:
 
         elif (girdi) == "help":
             print(sym,"""
-                
+
         -p ping   =   Icmp paketleri gönderir.
         -p bc     =   Arp paketi gönderir.
         -t        =   Zaman aralığını belirler.
         -m        =   Mac adresini belirler
+        -iface    =   Ağ arayüzü
 
         Icmp örnek IP girdisi     =   185.147.1.99/185.147.1.111
         Arp örnek IP girdisi      =   185.147.1.99/24
